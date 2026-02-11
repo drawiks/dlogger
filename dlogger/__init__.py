@@ -1,1 +1,1 @@
-from .logger import Logger, ConsoleHandler, FileHandler
+from .main import logger
