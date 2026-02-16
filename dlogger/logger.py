@@ -83,7 +83,6 @@ class dLogger:
         if log_file:
             self._ensure_log_directory()
             self._cleanup_old_logs()
-        
         return self
 
     def _parse_rotation(self, rotation: str):
@@ -123,7 +122,6 @@ class dLogger:
             return value * 7
         elif "month" in unit:
             return value * 30
-        
         return value
 
     def _ensure_log_directory(self):
@@ -139,7 +137,6 @@ class dLogger:
             if frame_info.filename != __file__:
                 filename = os.path.basename(frame_info.filename)
                 return f"{filename}:{frame_info.lineno}"
-        
         return "unknown"
 
     def _should_rotate(self) -> bool:
@@ -158,7 +155,6 @@ class dLogger:
             time_diff = (datetime.now() - self._current_file_creation).total_seconds()
             if time_diff >= self._rotation_time:
                 return True
-        
         return False
 
     def _rotate_log(self):
@@ -171,13 +167,12 @@ class dLogger:
         
         try:
             os.rename(self._log_file, rotated_name)
-            
+
             if self._compression:
                 self._compress_file(rotated_name)
             
             self._current_file_creation = datetime.now()
             self._cleanup_old_logs()
-        
         except Exception as e:
             print(f"⚠️ Ошибка при ротации лога: {e}")
 
@@ -186,9 +181,7 @@ class dLogger:
             with open(filepath, 'rb') as f_in:
                 with gzip.open(f"{filepath}.gz", 'wb') as f_out:
                     f_out.writelines(f_in)
-            
             os.remove(filepath)
-        
         except Exception as e:
             print(f"⚠️ Ошибка при сжатии файла: {e}")
 
@@ -213,28 +206,25 @@ class dLogger:
                 
                 if os.path.isfile(filepath):
                     file_mtime = datetime.fromtimestamp(os.path.getmtime(filepath))
-                    
                     if file_mtime < cutoff_date:
                         os.remove(filepath)
-        
         except Exception as e:
             print(f"⚠️ Ошибка при очистке старых логов: {e}")
 
     def _log(self, level_name: str, msg: str):
         level_val, color, *attrs = self.LEVELS[level_name] + (None,)
-        
         if level_val < self._level:
             return
         
         time_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        context = f" | {self._get_context()}" if self._show_path else ""
+        context = f" {self._get_context()}" if self._show_path else ""
         
         is_bold = attrs[0] and "bold" in attrs[0] if attrs[0] else False
         
         console_msg = (
             f"{Colors.colored(f'[{time_str}]', 'green')} "
             f"{Colors.colored(f'{level_name: <8}', color=color, bold=is_bold)} "
-            f"{Colors.colored('|', 'white')} {msg}"
+            f"{Colors.colored('|', 'white')} {msg} {Colors.colored('|', 'white')}"
             f"{Colors.colored(context, 'grey')}"
         )
         print(console_msg)
@@ -242,11 +232,9 @@ class dLogger:
         if self._log_file:
             if self._should_rotate():
                 self._rotate_log()
-            
             try:
                 with open(self._log_file, "a", encoding="utf-8") as f:
                     f.write(f"[{time_str}] {level_name: <8} | {msg}{context}\n")
-            
             except Exception as e:
                 print(f"⚠️ Ошибка записи в лог-файл: {e}")
 
