@@ -225,10 +225,10 @@ class dLogger:
         is_bold = attrs[0] and "bold" in attrs[0] if attrs[0] else False
         
         console_msg = (
-            f"{Colors.colored(f'[{time_str}]', 'green')} "
-            f"{Colors.colored(f'{level_name: <8}', color=color, bold=is_bold)} "
-            f"{Colors.colored('|', 'white')} {msg} {Colors.colored('|', 'white')}"
-            f"{Colors.colored(context, 'grey')}"
+            f"{Colors.colored(f'{time_str}', 'green')}" 
+            f"{Colors.colored('|', 'white')} {Colors.colored(f'{level_name: <8}', color=color, bold=is_bold)} "
+            f"{Colors.colored('|', 'white')} {Colors.colored(context, 'cyan')} "
+            f"{Colors.colored('-', 'white')} {msg}"
         )
         print(console_msg)
         
