@@ -46,7 +46,7 @@ class dLogger:
     LEVELS = {
         "TRACE": (10, "magenta"),
         "DEBUG": (10, "cyan", ["bold"]),
-        "INFO": (20, "blue", ["bold"]),
+        "INFO": (20, "white", ["bold"]),
         "SUCCESS": (30, "green", ["bold"]),
         "WARNING": (30, "yellow", ["bold"]),
         "ERROR": (40, "red", ["bold"]),
@@ -227,7 +227,7 @@ class dLogger:
         console_msg = (
             f"{Colors.colored(f'{time_str}', 'green')}" 
             f"{Colors.colored('|', 'white')} {Colors.colored(f'{level_name: <8}', color=color, bold=is_bold)} "
-            f"{Colors.colored('|', 'white')} {Colors.colored(context, 'cyan')} "
+            f"{Colors.colored('|', 'white')}{Colors.colored(context, 'cyan')} "
             f"{Colors.colored('-', 'white')} {msg}"
         )
         print(console_msg)
