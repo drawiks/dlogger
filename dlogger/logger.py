@@ -29,6 +29,7 @@ class Colors:
             "cyan": Colors.CYAN,
             "white": Colors.WHITE,
             "grey": Colors.GREY,
+            "magenta": Colors.MAGENTA
         }
         
         result = ""
@@ -43,10 +44,12 @@ class Colors:
 
 class dLogger:
     LEVELS = {
-        "DEBUG": (10, "cyan"),
-        "INFO": (20, "blue"),
-        "WARNING": (30, "yellow"),
-        "ERROR": (40, "red"),
+        "TRACE": (10, "magenta"),
+        "DEBUG": (10, "cyan", ["bold"]),
+        "INFO": (20, "blue", ["bold"]),
+        "SUCCESS": (30, "green", ["bold"]),
+        "WARNING": (30, "yellow", ["bold"]),
+        "ERROR": (40, "red", ["bold"]),
         "CRITICAL": (50, "red", ["bold"])
     }
 
@@ -238,11 +241,17 @@ class dLogger:
             except Exception as e:
                 print(f"⚠️ Ошибка записи в лог-файл: {e}")
 
+    def trace(self, msg: str):
+        self._log("TRACE", msg)
+    
     def debug(self, msg: str):
         self._log("DEBUG", msg)
 
     def info(self, msg: str):
         self._log("INFO", msg)
+        
+    def success(self, msg: str):
+        self._log("SUCCESS", msg)
 
     def warning(self, msg: str):
         self._log("WARNING", msg)
