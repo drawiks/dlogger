@@ -6,9 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "dlogger"
 version = "0.1.0"
 description = "Personal simple logger"
-dependencies = [
-    "termcolor",
-]
+dependencies = []
 
 [tool.setuptools.packages.find]
 where = ["."]
