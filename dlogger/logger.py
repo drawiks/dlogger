@@ -44,8 +44,8 @@ class Colors:
 
 class dLogger:
     LEVELS = {
-        "TRACE": (10, "magenta"),
-        "DEBUG": (10, "cyan", ["bold"]),
+        "TRACE": (10, "cyan", ["bold"]),
+        "DEBUG": (10, "blue", ["bold"]),
         "INFO": (20, "white", ["bold"]),
         "SUCCESS": (30, "green", ["bold"]),
         "WARNING": (30, "yellow", ["bold"]),
