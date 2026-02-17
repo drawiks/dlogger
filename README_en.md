@@ -1,5 +1,8 @@
 <div align="center">
     <h1>📝 dlogger</h1>
+    <a href="https://pypi.org/project/dlogger-drawiks/">
+        <img alt="PyPI version" src="https://img.shields.io/pypi/v/dlogger-drawiks?color=blue">
+    </a>
     <img height="20" alt="Python 3.7+" src="https://img.shields.io/badge/python-3.7+-blue">
     <img height="20" alt="License MIT" src="https://img.shields.io/badge/license-MIT-green">
     <img height="20" alt="Status" src="https://img.shields.io/badge/status-stable-brightgreen">
@@ -55,13 +58,11 @@ logger.info("but this will")
 
 ## **🧩 features**
 
-- 🎨 **colored output** — different colors for different levels
-- 📁 **size-based rotation** — `rotation="10MB"`
-- ⏰ **time-based rotation** — `rotation="1 day"`
-- 🗑️ **auto cleanup** — `retention="7 days"`
-- 📦 **compression** — `compression=True`
-- 🚫 **no dependencies** — stdlib only
-
+- 🎨 **TrueColor output** — HEX/RGB support powered by [dcolor](https://github.com/drawiks/dcolor)
+- 📁 **smart rotation** — by size (`10MB`, `1GB`) or time (`1 day`, `12 hours`)
+- 🗑️ **auto cleanup** — scheduled deletion of old files (`retention="30 days"`)
+- 📦 **compression** — automatic archiving of old logs to `.gz`
+- 🛠️ **minimal dependencies** — only [dcolor](https://github.com/drawiks/dcolor)
 ---
 
 ## **📖 usage**
