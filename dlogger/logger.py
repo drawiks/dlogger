@@ -185,14 +185,14 @@ class dLogger:
             return
 
         time_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        context = f" {self._get_context()}" if self._show_path else ""
+        context = f"{self._get_context()}" if self._show_path else ""
 
         is_critical = level_name == "CRITICAL"
 
         console_msg = (
             f"{color(time_str, '#4caf50')} "
             f"{color('|', 'white')} {color(f'{level_name: <8}', clr, 'bold', *(('underline',) if is_critical else ()))} "
-            f"{color('|', 'white')}{color(context, '#00bcd4')} "
+            f"{color('|', 'white')} {color(context, '#00bcd4')} "
             f"{color('-', 'white')} {msg}"
         )
         print(console_msg)
@@ -202,7 +202,7 @@ class dLogger:
                 self._rotate_log()
             try:
                 with open(self._log_file, "a", encoding="utf-8") as f:
-                    f.write(f"[{time_str}] {level_name: <8} | {msg}{context}\n")
+                    f.write(f"[{time_str}] | {level_name: <8} | {context} {msg}\n")
             except Exception as e:
                 print(f"{color('⚠️ ошибка записи в лог-файл:', '#ff9800')} {e}")
 
