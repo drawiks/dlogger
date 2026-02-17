@@ -177,16 +177,16 @@ logger.error("critical error in payments module")
 
 **console:**
 ```
-2024-02-16 14:30:22 | INFO     | app.services.groq:get_groq: - application started
+2026-02-17 14:09:13 | INFO     | src.bot:run: - init
 ```
 
 **file:**
 ```
-[2024-02-16 14:30:22] INFO     | application started | app.services.groq:get_groq:
-[2024-02-16 14:30:23] ERROR    | connection failed | app.db.client:connect:
+2026-02-17 14:09:13 | INFO     | src.main:run: init
+2026-02-17 14:09:13 | ERROR    | src.main:run: error
 ```
 
 ---
 
 ## **📜 license**
-[MIT](LICENSE)
+[MIT](https://github.com/drawiks/dlogger/blob/main/LICENSE)
