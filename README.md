@@ -21,12 +21,7 @@
 ## **📦 установка**
 
 ```bash
-pip install git+https://github.com/drawiks/dlogger.git
-```
-
-или добавь в `requirements.txt`:
-```
-dlogger @ git+https://github.com/drawiks/dlogger.git
+pip install dlogger-drawiks
 ```
 
 ---
