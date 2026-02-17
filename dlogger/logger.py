@@ -1,56 +1,20 @@
 
 from datetime import datetime, timedelta
 from typing import Optional
+from dcolor import color
 import inspect
 import gzip
 import os
 
-class Colors:
-    RESET = "\033[0m"
-    BOLD = "\033[1m"
-    
-    BLACK = "\033[30m"
-    RED = "\033[31m"
-    GREEN = "\033[32m"
-    YELLOW = "\033[33m"
-    BLUE = "\033[34m"
-    MAGENTA = "\033[35m"
-    CYAN = "\033[36m"
-    WHITE = "\033[37m"
-    GREY = "\033[90m"
-    
-    @staticmethod
-    def colored(text: str, color: str = None, bold: bool = False) -> str:
-        color_map = {
-            "red": Colors.RED,
-            "green": Colors.GREEN,
-            "yellow": Colors.YELLOW,
-            "blue": Colors.BLUE,
-            "cyan": Colors.CYAN,
-            "white": Colors.WHITE,
-            "grey": Colors.GREY,
-            "magenta": Colors.MAGENTA
-        }
-        
-        result = ""
-        if bold:
-            result += Colors.BOLD
-        if color and color in color_map:
-            result += color_map[color]
-        
-        result += text + Colors.RESET
-        return result
-
-
 class dLogger:
     LEVELS = {
-        "TRACE": (10, "cyan", ["bold"]),
-        "DEBUG": (10, "blue", ["bold"]),
-        "INFO": (20, "white", ["bold"]),
-        "SUCCESS": (30, "green", ["bold"]),
-        "WARNING": (30, "yellow", ["bold"]),
-        "ERROR": (40, "red", ["bold"]),
-        "CRITICAL": (50, "red", ["bold"])
+        "TRACE": (10, "#00bcd4"),
+        "DEBUG": (10, "#3b82f6"),
+        "INFO": (20, "#ffffff"),
+        "SUCCESS": (30, "#4caf50"),
+        "WARNING": (30, "#ff9800"),
+        "ERROR": (40, "#f44336"),
+        "CRITICAL": (50, "#f44336"),
     }
 
     def __init__(self):
@@ -216,23 +180,23 @@ class dLogger:
             print(f"⚠️ Ошибка при очистке старых логов: {e}")
 
     def _log(self, level_name: str, msg: str):
-        level_val, color, *attrs = self.LEVELS[level_name] + (None,)
+        level_val, clr = self.LEVELS[level_name]
         if level_val < self._level:
             return
-        
+
         time_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         context = f" {self._get_context()}" if self._show_path else ""
-        
-        is_bold = attrs[0] and "bold" in attrs[0] if attrs[0] else False
-        
+
+        is_critical = level_name == "CRITICAL"
+
         console_msg = (
-            f"{Colors.colored(f'{time_str}', 'green')} " 
-            f"{Colors.colored('|', 'white')} {Colors.colored(f'{level_name: <8}', color=color, bold=is_bold)} "
-            f"{Colors.colored('|', 'white')}{Colors.colored(context, 'cyan')} "
-            f"{Colors.colored('-', 'white')} {msg}"
+            f"{color(time_str, '#4caf50')} "
+            f"{color('|', 'white')} {color(f'{level_name: <8}', clr, 'bold', *(('underline',) if is_critical else ()))} "
+            f"{color('|', 'white')}{color(context, '#00bcd4')} "
+            f"{color('-', 'white')} {msg}"
         )
         print(console_msg)
-        
+
         if self._log_file:
             if self._should_rotate():
                 self._rotate_log()
@@ -240,7 +204,7 @@ class dLogger:
                 with open(self._log_file, "a", encoding="utf-8") as f:
                     f.write(f"[{time_str}] {level_name: <8} | {msg}{context}\n")
             except Exception as e:
-                print(f"⚠️ Ошибка записи в лог-файл: {e}")
+                print(f"{color('⚠️ ошибка записи в лог-файл:', '#ff9800')} {e}")
 
     def trace(self, msg: str):
         self._log("TRACE", msg)

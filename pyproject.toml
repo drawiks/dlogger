@@ -4,10 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dlogger-drawiks"
-version = "0.1.0"
+version = "0.2.0"
 description = "dlogger by drawiks"
 requires-python = ">=3.7"
-dependencies = []
+dependencies = [
+    "dcolor-drawiks",
+]
 readme = "README_en.md"
 
 [project.urls]
