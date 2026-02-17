@@ -135,11 +135,12 @@ class dLogger:
 
     def _get_context(self) -> str:
         stack = inspect.stack()
-        
+
         for frame_info in stack[2:]:
             if frame_info.filename != __file__:
-                filename = os.path.basename(frame_info.filename)
-                return f"{filename}:{frame_info.lineno}"
+                module = frame_info.frame.f_globals.get("__name__", "unknown")
+                function = frame_info.function
+                return f"{module}:{function}:"
         return "unknown"
 
     def _should_rotate(self) -> bool:

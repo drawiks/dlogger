@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "dlogger"
 version = "0.1.0"
-description = "Personal simple logger"
+description = "dlogger by drawiks"
 dependencies = []
 
 [tool.setuptools.packages.find]
