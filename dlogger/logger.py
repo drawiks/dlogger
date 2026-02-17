@@ -227,5 +227,4 @@ class dLogger:
     def critical(self, msg: str):
         self._log("CRITICAL", msg)
 
-
 logger = dLogger()
