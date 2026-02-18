@@ -1,6 +1,5 @@
-
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, Literal
 from dcolor import color
 import inspect
 import gzip
@@ -26,20 +25,49 @@ class dLogger:
         self._retention_days = None
         self._compression = False
         self._current_file_creation = None
+        self._time_format = "%Y-%m-%d %H:%M:%S"
 
     def configure(
         self,
-        level: str = "DEBUG",
+        level: Literal["TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL"] = "DEBUG",
         log_file: Optional[str] = None,
         show_path: bool = True,
         rotation: Optional[str] = None,
         retention: Optional[str] = None,
-        compression: bool = False
+        compression: bool = False,
+        time_format: Literal[
+            "%Y-%m-%d %H:%M:%S",
+            "%H:%M:%S",
+            "%d.%m.%Y %H:%M",
+            "%Y-%m-%dT%H:%M:%S",
+            "%d/%m/%Y %H:%M:%S",
+            "%Y-%m-%d %H:%M:%S.%f"
+        ] = "%Y-%m-%d %H:%M:%S"
     ):
+        """
+        Configure logger settings.
+        
+        Args:
+            level: Logging level
+            log_file: Path to log file
+            show_path: Show module:function: in logs
+            rotation: Log rotation ("10MB", "1GB", "1 day", "12 hours")
+            retention: How long to keep logs ("7 days", "1 month")
+            compression: Compress old logs to .gz
+            time_format: Time format string
+                - "%Y-%m-%d %H:%M:%S" - 2024-02-17 14:30:22 (default)
+                - "%H:%M:%S" - 14:30:22 (time only)
+                - "%d.%m.%Y %H:%M" - 17.02.2024 14:30 (european)
+                - "%Y-%m-%dT%H:%M:%S" - 2024-02-17T14:30:22 (ISO 8601)
+                - "%d/%m/%Y %H:%M:%S" - 17/02/2024 14:30:22 (uk/au)
+                - "%Y-%m-%d %H:%M:%S.%f" - 2024-02-17 14:30:22.123456 (microseconds)
+                - or any custom strftime format
+        """
         self._level = self.LEVELS.get(level.upper(), (10,))[0]
         self._log_file = log_file
         self._show_path = show_path
         self._compression = compression
+        self._time_format = time_format
         
         if rotation:
             self._parse_rotation(rotation)
@@ -184,7 +212,7 @@ class dLogger:
         if level_val < self._level:
             return
 
-        time_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        time_str = datetime.now().strftime(self._time_format)
         context = f"{self._get_context()}" if self._show_path else ""
 
         is_critical = level_name == "CRITICAL"
