@@ -124,6 +124,7 @@ logger.configure(
     rotation="10MB",           # size-based rotation
     retention="7 days",        # keep logs for 7 days
     compression=True           # compress old logs
+    time_format="%H:%M:%S"     # time format - 14:30:22
 )
 ```
 
@@ -166,6 +167,7 @@ logger.configure(
     rotation="50MB",
     retention="30 days",
     compression=True
+    time_format="%Y-%m-%d %H:%M:%S"
 )
 
 logger.info("application started")
