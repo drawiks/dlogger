@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Optional, Literal
 from dcolor import color
+import threading
+import atexit
 import inspect
 import gzip
 import os
@@ -26,6 +28,19 @@ class dLogger:
         self._compression = False
         self._current_file_creation = None
         self._time_format = "%Y-%m-%d %H:%M:%S"
+        
+        self._lock = threading.Lock()
+        self._buffer = []
+        self._buffer_size = 100
+        self._log_count = 0
+        self._check_rotation_every = 100
+        
+        self._separator = color('|', 'white')
+        self._dash = color('-', 'white')
+        
+        self._context_cache = {}
+        
+        atexit.register(self._cleanup_on_exit)
 
     def configure(
         self,
@@ -126,13 +141,31 @@ class dLogger:
                 os.makedirs(log_dir, exist_ok=True)
 
     def _get_context(self) -> str:
-        stack = inspect.stack()
-
-        for frame_info in stack[2:]:
-            if frame_info.filename != __file__:
-                module = frame_info.frame.f_globals.get("__name__", "unknown")
-                function = frame_info.function
-                return f"{module}:{function}:"
+        frame = inspect.currentframe()
+        if not frame:
+            return "unknown"
+        
+        caller_frame = frame.f_back.f_back
+        if not caller_frame:
+            return "unknown"
+        
+        filename = caller_frame.f_code.co_filename
+        lineno = caller_frame.f_lineno
+        
+        cache_key = (filename, lineno)
+        if cache_key in self._context_cache:
+            return self._context_cache[cache_key]
+        
+        if filename != __file__:
+            module = caller_frame.f_globals.get("__name__", "unknown")
+            function = caller_frame.f_code.co_name
+            result = f"{module}:{function}:"
+            
+            if len(self._context_cache) < 128:
+                self._context_cache[cache_key] = result
+            
+            return result
+        
         return "unknown"
 
     def _should_rotate(self) -> bool:
@@ -181,6 +214,20 @@ class dLogger:
         except Exception as e:
             print(f"⚠️ Ошибка при сжатии файла: {e}")
 
+    def _cleanup_on_exit(self):
+        self._flush_buffer()
+    
+    def _flush_buffer(self):
+        if not self._buffer or not self._log_file:
+            return
+        
+        try:
+            with open(self._log_file, "a", encoding="utf-8") as f:
+                f.writelines(self._buffer)
+            self._buffer.clear()
+        except Exception as e:
+            print(f"{color('⚠️ ошибка записи буфера:', '#ff9800')} {e}")
+
     def _cleanup_old_logs(self):
         if not self._log_file or not self._retention_days:
             return
@@ -212,27 +259,33 @@ class dLogger:
         if level_val < self._level:
             return
 
-        time_str = datetime.now().strftime(self._time_format)
-        context = f"{self._get_context()}" if self._show_path else ""
+        with self._lock:
+            now = datetime.now()
+            time_str = now.strftime(self._time_format)
+            context = f"{self._get_context()}" if self._show_path else ""
 
-        is_critical = level_name == "CRITICAL"
+            is_critical = level_name == "CRITICAL"
 
-        console_msg = (
-            f"{color(time_str, '#4caf50')} "
-            f"{color('|', 'white')} {color(f'{level_name: <8}', clr, 'bold', *(('underline',) if is_critical else ()))} "
-            f"{color('|', 'white')} {color(context, '#00bcd4')} "
-            f"{color('-', 'white')} {msg}"
-        )
-        print(console_msg)
+            console_msg = (
+                f"{color(time_str, '#4caf50')} "
+                f"{self._separator} {color(f'{level_name: <8}', clr, 'bold', *(('underline',) if is_critical else ()))} "
+                f"{self._separator} {color(context, '#00bcd4')} "
+                f"{self._dash} {msg}"
+            )
+            print(console_msg)
 
-        if self._log_file:
-            if self._should_rotate():
-                self._rotate_log()
-            try:
-                with open(self._log_file, "a", encoding="utf-8") as f:
-                    f.write(f"[{time_str}] | {level_name: <8} | {context} {msg}\n")
-            except Exception as e:
-                print(f"{color('⚠️ ошибка записи в лог-файл:', '#ff9800')} {e}")
+            if self._log_file:
+                self._buffer.append(f"[{time_str}] | {level_name: <8} | {context} {msg}\n")
+                
+                if len(self._buffer) >= self._buffer_size:
+                    self._flush_buffer()
+                
+                self._log_count += 1
+                
+                if self._log_count % self._check_rotation_every == 0:
+                    if self._should_rotate():
+                        self._flush_buffer()
+                        self._rotate_log()
 
     def trace(self, msg: str):
         self._log("TRACE", msg)
