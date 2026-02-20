@@ -59,6 +59,9 @@ logger.info("but this will")
 ## **🧩 features**
 
 - 🎨 **TrueColor output** — HEX/RGB support powered by [dcolor](https://github.com/drawiks/dcolor)
+- 🚀 **high performance** — use of buffers and call context caching
+- 🧵 **thread safety** — stability in multithreaded applications thanks to locks
+- 💾 **write guarantee** — automatic buffer reset upon correct program termination
 - 📁 **smart rotation** — by size (`10MB`, `1GB`) or time (`1 day`, `12 hours`)
 - 🗑️ **auto cleanup** — scheduled deletion of old files (`retention="30 days"`)
 - 📦 **compression** — automatic archiving of old logs to `.gz`
