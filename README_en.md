@@ -66,6 +66,7 @@ logger.info("but this will")
 - 🗑️ **auto cleanup** — scheduled deletion of old files (`retention="30 days"`)
 - 📦 **compression** — automatic archiving of old logs to `.gz`
 - 🛠️ **minimal dependencies** — only [dcolor](https://github.com/drawiks/dcolor)
+- ✅ **reliability** — protection from memory leaks, data loss and deadlocks
 ---
 
 ## **📖 usage**
