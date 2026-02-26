@@ -67,6 +67,7 @@ logger.info("а это будет")
 - 📦 **сжатие** - автоматическое архивирование старых логов в `.gz`
 - 🛠️ **минимум зависимостей** - только [dcolor](https://github.com/drawiks/dcolor)
 - ✅ **надёжность** - защита от утечек памяти, потери данных и deadlocks
+- 🏗️ **модульная архитектура** - расширяемость через handlers, formatters и filters
 ---
 
 ## **📖 использование**
@@ -176,6 +177,37 @@ logger.configure(
 
 logger.info("приложение запущено")
 logger.error("критическая ошибка в модуле payments")
+```
+
+### расширяемость (handlers, formatters, filters)
+
+```python
+from dlogger import dLogger, ConsoleHandler, FileHandler, LevelFilter
+
+# создать свой логгер
+my_logger = dLogger()
+
+# добавить обработчики
+my_logger.add_handler(ConsoleHandler(level="DEBUG"))
+my_logger.add_handler(FileHandler("app.log", rotation="10MB"))
+
+# или использовать готовый logger и добавлять/удалять handlers
+from dlogger import logger
+logger.remove_handler(logger.handlers[0])  # удалить console handler
+logger.add_handler(FileHandler("debug.log", level="DEBUG"))
+```
+
+### несколько логгеров
+
+```python
+from dlogger import dLogger
+
+# независимые логгеры для разных модулей
+app_logger = dLogger().configure(level="INFO", log_file="app.log")
+db_logger = dLogger().configure(level="DEBUG", log_file="db.log")
+
+app_logger.info("запуск приложения")
+db_logger.debug("запрос к базе данных")
 ```
 
 ## **📝 формат логов**

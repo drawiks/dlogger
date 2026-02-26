@@ -67,6 +67,7 @@ logger.info("but this will")
 - 📦 **compression** — automatic archiving of old logs to `.gz`
 - 🛠️ **minimal dependencies** — only [dcolor](https://github.com/drawiks/dcolor)
 - ✅ **reliability** — protection from memory leaks, data loss and deadlocks
+- 🏗️ **modular architecture** — extensible via handlers, formatters and filters
 ---
 
 ## **📖 usage**
@@ -176,6 +177,37 @@ logger.configure(
 
 logger.info("application started")
 logger.error("critical error in payments module")
+```
+
+### extensibility (handlers, formatters, filters)
+
+```python
+from dlogger import dLogger, ConsoleHandler, FileHandler, LevelFilter
+
+# create your own logger
+my_logger = dLogger()
+
+# add handlers
+my_logger.add_handler(ConsoleHandler(level="DEBUG"))
+my_logger.add_handler(FileHandler("app.log", rotation="10MB"))
+
+# or use the default logger and add/remove handlers
+from dlogger import logger
+logger.remove_handler(logger.handlers[0])  # remove console handler
+logger.add_handler(FileHandler("debug.log", level="DEBUG"))
+```
+
+### multiple loggers
+
+```python
+from dlogger import dLogger
+
+# independent loggers for different modules
+app_logger = dLogger().configure(level="INFO", log_file="app.log")
+db_logger = dLogger().configure(level="DEBUG", log_file="db.log")
+
+app_logger.info("application started")
+db_logger.debug("database query executed")
 ```
 
 ---

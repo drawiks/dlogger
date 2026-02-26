@@ -1,20 +1,21 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = [ "setuptools>=61.0" ]
 build-backend = "setuptools.build_meta"
+
 
 [project]
 name = "dlogger-drawiks"
-version = "0.2.4"
+version = "0.3.0"
 description = "dlogger by drawiks"
 requires-python = ">=3.7"
-dependencies = [
-    "dcolor-drawiks",
-]
+dependencies = [ "dcolor-drawiks" ]
 readme = "README_en.md"
+
 
 [project.urls]
 Homepage = "https://github.com/drawiks/dlogger"
 
+
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["dlogger*"]
+where = [ "." ]
+include = [ "dlogger*" ]
