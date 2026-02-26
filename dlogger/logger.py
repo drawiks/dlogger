@@ -142,31 +142,36 @@ class dLogger:
 
     def _get_context(self) -> str:
         frame = inspect.currentframe()
-        if not frame:
-            return "unknown"
-        
-        caller_frame = frame.f_back.f_back
-        if not caller_frame:
-            return "unknown"
-        
-        filename = caller_frame.f_code.co_filename
-        lineno = caller_frame.f_lineno
-        
-        cache_key = (filename, lineno)
-        if cache_key in self._context_cache:
-            return self._context_cache[cache_key]
-        
-        if filename != __file__:
-            module = caller_frame.f_globals.get("__name__", "unknown")
-            function = caller_frame.f_code.co_name
-            result = f"{module}:{function}:"
+        try:
+            caller_frame = frame.f_back
+            if not caller_frame:
+                return "unknown"
             
-            if len(self._context_cache) < 128:
-                self._context_cache[cache_key] = result
+            caller_frame = caller_frame.f_back
+            if not caller_frame:
+                return "unknown"
             
-            return result
-        
-        return "unknown"
+            filename = caller_frame.f_code.co_filename
+            lineno = caller_frame.f_lineno
+            
+            cache_key = (filename, lineno)
+            if cache_key in self._context_cache:
+                return self._context_cache[cache_key]
+            
+            if os.path.basename(filename) != os.path.basename(__file__):
+                module = caller_frame.f_globals.get("__name__", "unknown")
+                function = caller_frame.f_code.co_name
+                result = f"{module}:{function}:"
+                
+                with self._lock:
+                    if len(self._context_cache) < 128:
+                        self._context_cache[cache_key] = result
+                
+                return result
+            
+            return "unknown"
+        finally:
+            del frame
 
     def _should_rotate(self) -> bool:
         if not self._log_file or not os.path.exists(self._log_file):
@@ -221,12 +226,15 @@ class dLogger:
         if not self._buffer or not self._log_file:
             return
         
+        buffer_to_write = self._buffer
+        self._buffer = []
+        
         try:
             with open(self._log_file, "a", encoding="utf-8") as f:
-                f.writelines(self._buffer)
-            self._buffer.clear()
+                f.writelines(buffer_to_write)
         except Exception as e:
             print(f"{color('⚠️ ошибка записи буфера:', '#ff9800')} {e}")
+            self._buffer = buffer_to_write + self._buffer
 
     def _cleanup_old_logs(self):
         if not self._log_file or not self._retention_days:
@@ -255,25 +263,30 @@ class dLogger:
             print(f"⚠️ Ошибка при очистке старых логов: {e}")
 
     def _log(self, level_name: str, msg: str):
-        level_val, clr = self.LEVELS[level_name]
+        level_data = self.LEVELS.get(level_name)
+        if not level_data:
+            return
+        
+        level_val, clr = level_data
         if level_val < self._level:
             return
 
+        context = f"{self._get_context()}" if self._show_path else ""
+        
+        now = datetime.now()
+        time_str = now.strftime(self._time_format)
+
+        is_critical = level_name == "CRITICAL"
+
+        console_msg = (
+            f"{color(time_str, '#4caf50')} "
+            f"{self._separator} {color(f'{level_name: <8}', clr, 'bold', *(('underline',) if is_critical else ()))} "
+            f"{self._separator} {color(context, '#00bcd4')} "
+            f"{self._dash} {msg}"
+        )
+        print(console_msg)
+
         with self._lock:
-            now = datetime.now()
-            time_str = now.strftime(self._time_format)
-            context = f"{self._get_context()}" if self._show_path else ""
-
-            is_critical = level_name == "CRITICAL"
-
-            console_msg = (
-                f"{color(time_str, '#4caf50')} "
-                f"{self._separator} {color(f'{level_name: <8}', clr, 'bold', *(('underline',) if is_critical else ()))} "
-                f"{self._separator} {color(context, '#00bcd4')} "
-                f"{self._dash} {msg}"
-            )
-            print(console_msg)
-
             if self._log_file:
                 self._buffer.append(f"[{time_str}] | {level_name: <8} | {context} {msg}\n")
                 
