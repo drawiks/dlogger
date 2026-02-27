@@ -1,6 +1,6 @@
 
 from datetime import datetime
-from typing import Optional, Literal, List
+from typing import Optional, Literal, List, Union
 import threading
 import inspect
 import os
@@ -8,6 +8,7 @@ import os
 from .handlers.base import Handler, LogRecord
 from .handlers.console import ConsoleHandler
 from .handlers.file import FileHandler
+from .formatters.exception import ExceptionFormatter
 
 class dLogger:
     """main logger class - facade over handlers."""
@@ -176,5 +177,23 @@ class dLogger:
 
     def critical(self, msg: str):
         self._log("CRITICAL", msg)
+
+    def exception(self, msg: str, exc: Optional[BaseException] = None):
+        """log exception with traceback.
+        
+        args:
+            msg: message
+            exc: exception object (optional, uses sys.exc_info() if not provided)
+        """
+        if exc is None:
+            exc = ExceptionFormatter.get_current_exception()
+        
+        if exc:
+            tb = ExceptionFormatter.format_exception(exc)
+            full_msg = f"{msg}\n{tb}"
+        else:
+            full_msg = msg
+        
+        self._log("ERROR", full_msg)
 
 logger = dLogger()
