@@ -3,7 +3,7 @@ from .handlers import Handler, ConsoleHandler, FileHandler, LogRecord, Filter
 from .formatters import Formatter, SimpleFormatter
 from .filters import LevelFilter, KeywordFilter, ModuleFilter
 
-__version__ = "0.3.2"
+__version__ = "0.3.3"
 __all__ = [
     "logger",
     "dLogger",
