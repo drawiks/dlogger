@@ -226,6 +226,24 @@ handler2.add_filter(ModuleFilter(modules=["database:", "api:"]))
 logger.add_handler(handler2)
 ```
 
+### логирование исключений
+
+```python
+from dlogger import logger
+
+# автоматически - использует sys.exc_info()
+try:
+    result = 1 / 0
+except:
+    logger.exception("деление на ноль")
+
+# с передачей исключения
+try:
+    result = 1 / 0
+except ZeroDivisionError as e:
+    logger.exception("ошибка", exc=e)
+```
+
 ## **📝 формат логов**
 
 **в консоли:**
