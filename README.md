@@ -3,7 +3,7 @@
     <a href="https://pypi.org/project/dlogger-drawiks/">
         <img alt="PyPI version" src="https://img.shields.io/pypi/v/dlogger-drawiks?color=blue">
     </a>
-    <img height="20" alt="Python 3.7+" src="https://img.shields.io/badge/python-3.7+-blue">
+    <img height="20" alt="Python 3.8+" src="https://img.shields.io/badge/python-3.8+-blue">
     <img height="20" alt="License MIT" src="https://img.shields.io/badge/license-MIT-green">
     <img height="20" alt="Status" src="https://img.shields.io/badge/status-stable-brightgreen">
     <p><strong>dlogger</strong> - простой логгер для личных проектов</p>
@@ -208,6 +208,22 @@ db_logger = dLogger().configure(level="DEBUG", log_file="db.log")
 
 app_logger.info("запуск приложения")
 db_logger.debug("запрос к базе данных")
+```
+
+### фильтры (KeywordFilter, ModuleFilter)
+
+```python
+from dlogger import logger, KeywordFilter, ModuleFilter, FileHandler
+
+# исключить пароли и токены из логов
+handler = FileHandler("app.log")
+handler.add_filter(KeywordFilter(exclude=["password", "token", "secret"]))
+logger.add_handler(handler)
+
+# логировать только определённые модули
+handler2 = FileHandler("debug.log")
+handler2.add_filter(ModuleFilter(modules=["database:", "api:"]))
+logger.add_handler(handler2)
 ```
 
 ## **📝 формат логов**

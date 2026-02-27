@@ -183,7 +183,7 @@ class FileHandler(Handler):
             self._buffer = buffer_to_write + self._buffer
 
     def emit(self, record: LogRecord):
-        """Emit a log record to file."""
+        """emit a log record to file."""
         if not self._should_log(record):
             return
 

@@ -5,15 +5,41 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dlogger-drawiks"
-version = "0.3.0"
+version = "0.3.3"
 description = "dlogger by drawiks"
-requires-python = ">=3.7"
-dependencies = [ "dcolor-drawiks" ]
 readme = "README_en.md"
+requires-python = ">=3.8"
+dependencies = [ "dcolor-drawiks" ]
+keywords = [ "logger", "logging", "color", "cli" ]
+classifiers = [
+"Development Status :: 4 - Beta",
+"Intended Audience :: Developers",
+"License :: OSI Approved :: MIT License",
+"Programming Language :: Python :: 3",
+"Programming Language :: Python :: 3.8",
+"Programming Language :: Python :: 3.9",
+"Programming Language :: Python :: 3.10",
+"Programming Language :: Python :: 3.11",
+"Programming Language :: Python :: 3.12",
+"Programming Language :: Python :: 3.13",
+"Programming Language :: Python :: 3.14",
+"Topic :: Software Development :: Libraries"
+]
+
+
+[project.license]
+text = "MIT"
+
+
+[[project.authors]]
+name = "drawiks"
+email = "drawiks@gmail.com"
 
 
 [project.urls]
 Homepage = "https://github.com/drawiks/dlogger"
+Repository = "https://github.com/drawiks/dlogger"
+Issues = "https://github.com/drawiks/dlogger/issues"
 
 
 [tool.setuptools.packages.find]

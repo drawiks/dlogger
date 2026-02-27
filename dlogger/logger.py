@@ -100,29 +100,33 @@ class dLogger:
             caller_frame = frame.f_back
             if not caller_frame:
                 return "unknown"
-
+            
             caller_frame = caller_frame.f_back
             if not caller_frame:
                 return "unknown"
-
+            
+            caller_frame = caller_frame.f_back
+            if not caller_frame:
+                return "unknown"
+            
             filename = caller_frame.f_code.co_filename
             lineno = caller_frame.f_lineno
-
+            
             cache_key = (filename, lineno)
             if cache_key in self._context_cache:
                 return self._context_cache[cache_key]
-
-            if os.path.basename(filename) != os.path.basename(__file__):
+            
+            if "dlogger" not in caller_frame.f_globals.get("__name__", ""):
                 module = caller_frame.f_globals.get("__name__", "unknown")
                 function = caller_frame.f_code.co_name
                 result = f"{module}:{function}:"
-
+                
                 with self._lock:
                     if len(self._context_cache) < 128:
                         self._context_cache[cache_key] = result
-
+                
                 return result
-
+            
             return "unknown"
         finally:
             del frame

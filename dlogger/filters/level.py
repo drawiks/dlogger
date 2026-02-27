@@ -10,5 +10,5 @@ class LevelFilter(Filter):
         self._min_level = level_data[0] if level_data else 10
 
     def filter(self, record: LogRecord) -> bool:
-        """Return True if record level is >= min_level."""
+        """return True if record level is >= min_level."""
         return record.level_value >= self._min_level
