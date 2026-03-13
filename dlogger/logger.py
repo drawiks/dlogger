@@ -22,13 +22,24 @@ class dLogger:
         "CRITICAL": (50, "#f44336"),
     }
 
-    def __init__(self):
+    def __init__(self, name: str = None):
+        self._name = name
+        self._parent = None
         self._level = 10
         self._handlers: List[Handler] = []
         self._lock = threading.Lock()
         self._context_cache = {}
 
-        self.add_handler(ConsoleHandler(level="TRACE"))
+        if name is None:
+            self.add_handler(ConsoleHandler(level="TRACE"))
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def parent(self):
+        return self._parent
 
     @property
     def handlers(self) -> List[Handler]:
@@ -138,7 +149,10 @@ class dLogger:
             return
 
         level_val, clr = level_data
-        if level_val < self._level:
+        effective_level = self._level
+        if self._parent and not self._handlers:
+            effective_level = self._parent._level
+        if level_val < effective_level:
             return
 
         context = context or self._get_context()
@@ -153,8 +167,10 @@ class dLogger:
             color=clr,
         )
 
+        handlers = self._handlers if self._handlers else (self._parent._handlers if self._parent else [])
+
         with self._lock:
-            for handler in self._handlers:
+            for handler in handlers:
                 handler.emit(record)
 
     def trace(self, msg: str, context: str = None):

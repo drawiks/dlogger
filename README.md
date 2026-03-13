@@ -197,7 +197,21 @@ logger.remove_handler(logger.handlers[0])  # удалить console handler
 logger.add_handler(FileHandler("debug.log", level="DEBUG"))
 ```
 
-### несколько логгеров
+### несколько логгеров (get_logger)
+
+```python
+from dlogger import get_logger
+
+# как logging.getLogger()
+app = get_logger("myapp")
+module = get_logger("myapp.module")
+
+# дочерний логгер наследует handlers и level от родителя
+app.info("сообщение от app")
+module.info("сообщение от module")
+```
+
+### несколько логгеров (dLogger)
 
 ```python
 from dlogger import dLogger
