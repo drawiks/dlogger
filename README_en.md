@@ -75,7 +75,7 @@ logger.info("but this will")
 ### log levels
 
 ```python
-logger.configure(level="INFO")  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+logger.configure(level="INFO")  # TRACE, DEBUG, INFO, SUCCESS, WARNING, ERROR, CRITICAL
 ```
 
 ### size-based rotation
@@ -243,6 +243,38 @@ try:
 except ZeroDivisionError as e:
     logger.exception("error", exc=e)
 ```
+
+### custom context
+
+```python
+from dlogger import logger
+
+# pass custom context
+logger.info("message", context="my.module:function:")
+
+# for external library integration
+logger.debug("debug from library", context="library.module:handler:")
+```
+
+---
+
+## **🖥️ uvicorn integration**
+
+```python
+from dlogger import logger, uvicorn_config
+from uvicorn.config import Config
+from uvicorn.server import Server
+
+config = Config(
+    "app:app",
+    host="0.0.0.0",
+    port=8000,
+    log_config=uvicorn_config(logger)
+)
+server = Server(config=config)
+```
+
+all uvicorn logs will be routed through dlogger with colors and formatting preserved.
 
 ---
 

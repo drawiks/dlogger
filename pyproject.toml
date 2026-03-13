@@ -5,15 +5,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dlogger-drawiks"
-version = "0.3.4"
+version = "0.3.5"
 description = "dlogger by drawiks"
 readme = "README_en.md"
 requires-python = ">=3.8"
 dependencies = [ "dcolor-drawiks" ]
 keywords = [ "logger", "logging", "color", "cli" ]
 classifiers = [
-"Development Status :: 4 - Beta",
-"Intended Audience :: Developers",
 "License :: OSI Approved :: MIT License",
 "Programming Language :: Python :: 3",
 "Programming Language :: Python :: 3.8",
@@ -33,7 +31,7 @@ text = "MIT"
 
 [[project.authors]]
 name = "drawiks"
-email = "drawiks@gmail.com"
+email = "drawksr@gmail.com"
 
 
 [project.urls]

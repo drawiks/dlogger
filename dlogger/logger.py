@@ -1,9 +1,8 @@
 
 from datetime import datetime
-from typing import Optional, Literal, List, Union
+from typing import Optional, Literal, List
 import threading
 import inspect
-import os
 
 from .handlers.base import Handler, LogRecord
 from .handlers.console import ConsoleHandler
@@ -80,7 +79,7 @@ class dLogger:
         for handler in self._handlers:
             handler.set_level(level)
             if isinstance(handler, ConsoleHandler):
-                handler._show_path = show_path
+                handler.show_path = show_path
 
         if log_file:
             file_handler = FileHandler(
@@ -114,8 +113,9 @@ class dLogger:
             lineno = caller_frame.f_lineno
             
             cache_key = (filename, lineno)
-            if cache_key in self._context_cache:
-                return self._context_cache[cache_key]
+            with self._lock:
+                if cache_key in self._context_cache:
+                    return self._context_cache[cache_key]
             
             if "dlogger" not in caller_frame.f_globals.get("__name__", ""):
                 module = caller_frame.f_globals.get("__name__", "unknown")
@@ -132,7 +132,7 @@ class dLogger:
         finally:
             del frame
 
-    def _log(self, level_name: str, msg: str):
+    def _log(self, level_name: str, msg: str, context: str = None):
         level_data = self.LEVELS.get(level_name)
         if not level_data:
             return
@@ -141,7 +141,7 @@ class dLogger:
         if level_val < self._level:
             return
 
-        context = self._get_context()
+        context = context or self._get_context()
         now = datetime.now()
 
         record = LogRecord(
@@ -157,33 +157,34 @@ class dLogger:
             for handler in self._handlers:
                 handler.emit(record)
 
-    def trace(self, msg: str):
-        self._log("TRACE", msg)
+    def trace(self, msg: str, context: str = None):
+        self._log("TRACE", msg, context)
 
-    def debug(self, msg: str):
-        self._log("DEBUG", msg)
+    def debug(self, msg: str, context: str = None):
+        self._log("DEBUG", msg, context)
 
-    def info(self, msg: str):
-        self._log("INFO", msg)
+    def info(self, msg: str, context: str = None):
+        self._log("INFO", msg, context)
 
-    def success(self, msg: str):
-        self._log("SUCCESS", msg)
+    def success(self, msg: str, context: str = None):
+        self._log("SUCCESS", msg, context)
 
-    def warning(self, msg: str):
-        self._log("WARNING", msg)
+    def warning(self, msg: str, context: str = None):
+        self._log("WARNING", msg, context)
 
-    def error(self, msg: str):
-        self._log("ERROR", msg)
+    def error(self, msg: str, context: str = None):
+        self._log("ERROR", msg, context)
 
-    def critical(self, msg: str):
-        self._log("CRITICAL", msg)
+    def critical(self, msg: str, context: str = None):
+        self._log("CRITICAL", msg, context)
 
-    def exception(self, msg: str, exc: Optional[BaseException] = None):
+    def exception(self, msg: str, exc: Optional[BaseException] = None, context: str = None):
         """log exception with traceback.
         
         args:
             msg: message
             exc: exception object (optional, uses sys.exc_info() if not provided)
+            context: context string (optional)
         """
         if exc is None:
             exc = ExceptionFormatter.get_current_exception()
@@ -194,6 +195,6 @@ class dLogger:
         else:
             full_msg = msg
         
-        self._log("ERROR", full_msg)
+        self._log("ERROR", full_msg, context)
 
 logger = dLogger()

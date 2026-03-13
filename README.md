@@ -75,7 +75,7 @@ logger.info("а это будет")
 ### уровни логирования
 
 ```python
-logger.configure(level="INFO")  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+logger.configure(level="INFO")  # TRACE, DEBUG, INFO, SUCCESS, WARNING, ERROR, CRITICAL
 ```
 
 ### ротация по размеру
@@ -243,6 +243,40 @@ try:
 except ZeroDivisionError as e:
     logger.exception("ошибка", exc=e)
 ```
+
+### кастомный контекст
+
+```python
+from dlogger import logger
+
+# передать свой контекст
+logger.info("сообщение", context="my.module:function:")
+
+# для интеграции с внешними библиотеками
+logger.debug("debug from library", context="library.module:handler:")
+```
+
+---
+
+## **🖥️ интеграция с uvicorn**
+
+```python
+from dlogger import logger, uvicorn_config
+from uvicorn.config import Config
+from uvicorn.server import Server
+
+config = Config(
+    "app:app",
+    host="0.0.0.0",
+    port=8000,
+    log_config=uvicorn_config(logger)
+)
+server = Server(config=config)
+```
+
+все логи uvicorn будут выводиться через dlogger с сохранением цветов и форматирования.
+
+---
 
 ## **📝 формат логов**
 
