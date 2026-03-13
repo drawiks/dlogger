@@ -274,6 +274,8 @@ logger.debug("debug from library", context="library.module:handler:")
 
 ## **🖥️ uvicorn integration**
 
+### quick way
+
 ```python
 from dlogger import logger, uvicorn_config
 from uvicorn.config import Config
@@ -288,7 +290,46 @@ config = Config(
 server = Server(config=config)
 ```
 
-all uvicorn logs will be routed through dlogger with colors and formatting preserved.
+### from config file
+
+Create `dlogger.conf`:
+
+```ini
+[loggers]
+keys=root,repos,routers,utils
+
+[logger_root]
+level=DEBUG
+log_file=app.log
+
+[logger_repos]
+level=INFO
+log_file=repos.log
+rotation=10MB
+retention=7 days
+
+[logger_routers]
+level=WARNING
+```
+
+Then:
+
+```python
+from dlogger import load
+from uvicorn.config import Config
+from uvicorn.server import Server
+
+config = Config("app:app", log_config=load())
+server = Server(config=config)
+```
+
+**supported parameters in dlogger.conf:**
+- `level` - log level
+- `log_file` - path to log file
+- `rotation` - rotation (10MB, 1GB, 1 day, 12 hours)
+- `retention` - retention (7 days, 1 month)
+- `compression` - compression (true/false)
+- `time_format` - time format
 
 ---
 

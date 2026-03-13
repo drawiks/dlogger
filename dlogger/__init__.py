@@ -2,13 +2,16 @@ from .logger import logger, dLogger
 from .handlers import Handler, ConsoleHandler, FileHandler, LogRecord, Filter
 from .formatters import Formatter, SimpleFormatter, ExceptionFormatter
 from .filters import LevelFilter, KeywordFilter, ModuleFilter
-from .integrations import uvicorn_config
+from .integrations import uvicorn_config, load
 from .handlers.compat import CompatHandler
 
-__version__ = "0.3.6"
+__version__ = "0.3.7"
+
+import threading
 
 _loggers = {}
 _MAX_LOGGERS = 128
+_lock = threading.Lock()
 
 
 def get_logger(name: str = None):
@@ -23,21 +26,22 @@ def get_logger(name: str = None):
     if name is None:
         return logger
 
-    if name in _loggers:
-        return _loggers[name]
+    with _lock:
+        if name in _loggers:
+            return _loggers[name]
 
-    if len(_loggers) >= _MAX_LOGGERS:
-        _loggers.clear()
+        if len(_loggers) >= _MAX_LOGGERS:
+            _loggers.clear()
 
-    new_logger = dLogger(name=name)
+        new_logger = dLogger(name=name)
 
-    if "." in name:
-        parent_name = name.rsplit(".", 1)[0]
-        if parent_name in _loggers:
-            new_logger._parent = _loggers[parent_name]
+        if "." in name:
+            parent_name = name.rsplit(".", 1)[0]
+            if parent_name in _loggers:
+                new_logger._parent = _loggers[parent_name]
 
-    _loggers[name] = new_logger
-    return new_logger
+        _loggers[name] = new_logger
+        return new_logger
 
 
 __all__ = [
@@ -57,4 +61,5 @@ __all__ = [
     "ModuleFilter",
     "CompatHandler",
     "uvicorn_config",
+    "load",
 ]
