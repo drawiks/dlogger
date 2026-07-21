@@ -6,6 +6,9 @@
     <img height="20" alt="Python 3.8+" src="https://img.shields.io/badge/python-3.8+-blue">
     <img height="20" alt="License MIT" src="https://img.shields.io/badge/license-MIT-green">
     <img height="20" alt="Status" src="https://img.shields.io/badge/status-stable-brightgreen">
+    <p>
+        <img height="20" alt="PyPI Downloads" src="https://static.pepy.tech/personalized-badge/dlogger-drawiks?period=total&units=INTERNATIONAL_SYSTEM&left_color=GREY&right_color=GREEN&left_text=downloads">
+    </p>
     <p><strong>dlogger</strong> - простой логгер для личных проектов</p>
     <blockquote>(─‿‿─)</blockquote>
 </div>
