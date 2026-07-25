@@ -128,7 +128,7 @@ logger.configure(
     show_path=True,            # show module:function:
     rotation="10MB",           # size-based rotation
     retention="7 days",        # keep logs for 7 days
-    compression=True           # compress old logs
+    compression=True,
     time_format="%H:%M:%S"     # time format - 14:30:22
 )
 ```
@@ -171,7 +171,7 @@ logger.configure(
     log_file="logs/production.log",
     rotation="50MB",
     retention="30 days",
-    compression=True
+    compression=True,
     time_format="%Y-%m-%d %H:%M:%S"
 )
 
@@ -330,6 +330,65 @@ server = Server(config=config)
 - `retention` - retention (7 days, 1 month)
 - `compression` - compression (true/false)
 - `time_format` - time format
+
+---
+
+## **🔗 context binding (bind)**
+
+```python
+from dlogger import logger
+
+# bind context to all logs
+bound = logger.bind(request_id="abc-123", user_id=42)
+bound.info("request processed")  # request_id=abc-123 user_id=42
+bound.error("error")             # request_id=abc-123 user_id=42
+
+# chaining
+bound2 = logger.bind(service="api").bind(version="v1")
+```
+
+### temporary context (contextualize)
+
+```python
+from dlogger import logger
+
+# context only within with-block
+with logger.contextualize(request_id="xyz-789"):
+    logger.info("inside block")    # request_id=xyz-789
+
+logger.info("outside block")       # no request_id
+```
+
+---
+
+## **📦 JSON mode**
+
+```python
+from dlogger import logger
+
+logger.configure(
+    level="INFO",
+    log_file="app.log",
+    serialize=True
+)
+
+logger.info("request processed")
+# {"time":"2026-07-25 14:00:00","level":"INFO","level_value":20,"context":"module:func:","message":"request processed","pid":12345}
+```
+
+---
+
+## **🏗️ NullHandler for libraries**
+
+if you're writing a library and want users to use dlogger:
+
+```python
+from dlogger import NullHandler
+
+# add NullHandler to avoid "No handlers" warning
+import logging
+logging.getLogger("mylib").addHandler(NullHandler())
+```
 
 ---
 

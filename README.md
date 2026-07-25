@@ -131,7 +131,7 @@ logger.configure(
     show_path=True,            # показывать файл:строку
     rotation="10MB",           # ротация по размеру
     retention="7 days",        # хранить логи 7 дней
-    compression=True           # сжимать старые логи
+    compression=True,          # сжимать старые логи
     time_format="%H:%M:%S"     # формат времени - 14:30:22
 )
 ```
@@ -174,7 +174,7 @@ logger.configure(
     log_file="logs/production.log",
     rotation="50MB",
     retention="30 days",
-    compression=True
+    compression=True,
     time_format="%Y-%m-%d %H:%M:%S"
 )
 
@@ -333,6 +333,65 @@ server = Server(config=config)
 - `retention` - хранение (7 days, 1 month)
 - `compression` - сжатие (true/false)
 - `time_format` - формат времени
+
+---
+
+## **🔗 привязка контекста (bind)**
+
+```python
+from dlogger import logger
+
+# привязать контекст ко всем логам
+bound = logger.bind(request_id="abc-123", user_id=42)
+bound.info("запрос обработан")  # request_id=abc-123 user_id=42
+bound.error("ошибка")           # request_id=abc-123 user_id=42
+
+# chaining
+bound2 = logger.bind(service="api").bind(version="v1")
+```
+
+### временный контекст (contextualize)
+
+```python
+from dlogger import logger
+
+# контекст только внутри with-блока
+with logger.contextualize(request_id="xyz-789"):
+    logger.info("внутри блока")    # request_id=xyz-789
+
+logger.info("снаружи блока")       # без request_id
+```
+
+---
+
+## **📦 JSON режим**
+
+```python
+from dlogger import logger
+
+logger.configure(
+    level="INFO",
+    log_file="app.log",
+    serialize=True
+)
+
+logger.info("запрос обработан")
+# {"time":"2026-07-25 14:00:00","level":"INFO","level_value":20,"context":"module:func:","message":"запрос обработан","pid":12345}
+```
+
+---
+
+## **🏗️ NullHandler для библиотек**
+
+если вы пишете библиотеку и хотите чтобы пользователи могли использовать dlogger:
+
+```python
+from dlogger import NullHandler
+
+# добавить NullHandler чтобы избежать "No handlers" warning
+import logging
+logging.getLogger("mylib").addHandler(NullHandler())
+```
 
 ---
 
