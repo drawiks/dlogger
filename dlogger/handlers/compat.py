@@ -17,6 +17,7 @@ class CompatHandler(logging.Handler):
             level_map = {
                 logging.DEBUG: "debug",
                 logging.INFO: "info",
+                25: "success",
                 logging.WARNING: "warning",
                 logging.ERROR: "error",
                 logging.CRITICAL: "critical",
