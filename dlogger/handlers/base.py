@@ -1,7 +1,8 @@
 
 from abc import ABC, abstractmethod
-from typing import Optional, List, Any
+from typing import Optional, List, Dict
 from datetime import datetime
+import os
 
 class Formatter:
     """base formatter interface."""
@@ -21,6 +22,7 @@ class LogRecord:
         context: str,
         timestamp: datetime,
         color: Optional[str] = None,
+        extra: Optional[Dict] = None,
     ):
         self.level = level
         self.level_value = level_value
@@ -28,11 +30,13 @@ class LogRecord:
         self.context = context
         self.timestamp = timestamp
         self.color = color
+        self.extra = extra or {}
+        self.pid = os.getpid()
+        self.tid = os.gettid() if hasattr(os, 'gettid') else 0
 
-class Filter(ABC):
+class Filter:
     """base filter interface."""
 
-    @abstractmethod
     def filter(self, record: LogRecord) -> bool:
         """return True if record should be logged."""
         raise NotImplementedError
@@ -88,11 +92,20 @@ class Handler(ABC):
                 return False
         return True
 
-    @abstractmethod
-    def emit(self, record: Any):
+    def emit(self, record: LogRecord):
         """emit a log record. Must be implemented by subclasses."""
         raise NotImplementedError
 
     def close(self):
         """close the handler and release resources."""
+        pass
+
+
+class NullHandler(Handler):
+    """no-op handler for library use. prevents 'No handlers' warnings."""
+
+    def __init__(self):
+        super().__init__(level="CRITICAL")
+
+    def emit(self, record: LogRecord):
         pass
