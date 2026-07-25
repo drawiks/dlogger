@@ -36,10 +36,14 @@ class ConsoleHandler(Handler):
 
         is_critical = record.level == "CRITICAL"
 
+        extra_str = ""
+        if record.extra:
+            extra_str = " " + " ".join(f"{k}={v}" for k, v in record.extra.items())
+
         msg = (
             f"{color(time_str, '#4caf50')} "
             f"{self._separator} {color(f'{record.level: <8}', record.color or '#ffffff', 'bold', *(('underline',) if is_critical else ()))} "
             f"{self._separator} {color(context, '#00bcd4')} "
-            f"{self._dash} {record.message}"
+            f"{self._dash} {record.message}{extra_str}"
         )
         print(msg)

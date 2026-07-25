@@ -1,1 +1,1 @@
-dcolor-drawiks==0.1.0
+dcolor-drawiks>=0.1.0

@@ -1,10 +1,12 @@
 
+import json
 from typing import Optional, Literal
 from datetime import datetime, timedelta
 import threading
 import atexit
 import gzip
 import os
+import queue
 
 from .base import Handler, LogRecord, Formatter
 
@@ -19,6 +21,8 @@ class FileHandler(Handler):
         rotation: Optional[str] = None,
         retention: Optional[str] = None,
         compression: bool = False,
+        serialize: bool = False,
+        enqueue: bool = False,
         buffer_size: int = 100,
         time_format: str = "%Y-%m-%d %H:%M:%S",
     ):
@@ -28,7 +32,8 @@ class FileHandler(Handler):
         self._rotation_time = None
         self._retention_days = None
         self._compression = compression
-        self._current_file_creation = None
+        self._serialize = serialize
+        self._enqueue = enqueue
         self._time_format = time_format
 
         self._lock = threading.Lock()
@@ -48,7 +53,24 @@ class FileHandler(Handler):
         if self._retention_days:
             self._cleanup_old_logs()
 
+        if self._enqueue:
+            self._queue = queue.Queue()
+            self._worker = threading.Thread(target=self._enqueue_worker, daemon=True)
+            self._worker.start()
+
         atexit.register(self.close)
+
+    def _enqueue_worker(self):
+        while True:
+            try:
+                record = self._queue.get(timeout=0.1)
+                if record is None:
+                    break
+                self._write_record(record)
+            except queue.Empty:
+                continue
+            except Exception as e:
+                print(f"⚠️ Enqueue worker error: {e}")
 
     def _parse_rotation(self, rotation: str):
         rotation = rotation.strip().lower()
@@ -104,10 +126,8 @@ class FileHandler(Handler):
                 return True
 
         if self._rotation_time:
-            if self._current_file_creation is None:
-                self._current_file_creation = datetime.now()
-
-            time_diff = (datetime.now() - self._current_file_creation).total_seconds()
+            creation_time = datetime.fromtimestamp(os.path.getctime(self._filename))
+            time_diff = (datetime.now() - creation_time).total_seconds()
             if time_diff >= self._rotation_time:
                 return True
         return False
@@ -125,8 +145,6 @@ class FileHandler(Handler):
             if self._compression:
                 self._compress_file(rotated_name)
 
-            self._current_file_creation = datetime.now()
-
             if self._retention_days:
                 self._cleanup_old_logs()
         except Exception as e:
@@ -136,7 +154,8 @@ class FileHandler(Handler):
         try:
             with open(filepath, 'rb') as f_in:
                 with gzip.open(f"{filepath}.gz", 'wb') as f_out:
-                    f_out.writelines(f_in)
+                    for line in f_in:
+                        f_out.write(line)
             os.remove(filepath)
         except Exception as e:
             print(f"⚠️ Error during file compression: {e}")
@@ -175,21 +194,36 @@ class FileHandler(Handler):
         self._buffer = []
 
         try:
+            if not os.path.exists(self._filename):
+                self._ensure_log_directory()
+
             with open(self._filename, "a", encoding="utf-8") as f:
                 f.writelines(buffer_to_write)
         except Exception as e:
             print(f"⚠️ Buffer write error: {e}")
             self._buffer = buffer_to_write + self._buffer
 
-    def emit(self, record: LogRecord):
-        """emit a log record to file."""
-        if not self._should_log(record):
-            return
-
+    def _format_record(self, record: LogRecord) -> str:
         time_str = record.timestamp.strftime(self._time_format)
         context = record.context
 
-        log_line = f"[{time_str}] | {record.level: <8} | {context} {record.message}\n"
+        if self._serialize:
+            log_entry = {
+                "time": time_str,
+                "level": record.level,
+                "level_value": record.level_value,
+                "context": context,
+                "message": record.message,
+                "pid": record.pid,
+            }
+            if record.extra:
+                log_entry["extra"] = record.extra
+            return json.dumps(log_entry, ensure_ascii=False) + "\n"
+        else:
+            return f"[{time_str}] | {record.level: <8} | {context} {record.message}\n"
+
+    def _write_record(self, record: LogRecord):
+        log_line = self._format_record(record)
 
         with self._lock:
             self._buffer.append(log_line)
@@ -204,6 +238,21 @@ class FileHandler(Handler):
                     self._flush_buffer()
                     self._rotate_log()
 
+    def emit(self, record: LogRecord):
+        """emit a log record to file."""
+        if not self._should_log(record):
+            return
+
+        if self._enqueue:
+            self._queue.put(record)
+        else:
+            self._write_record(record)
+
     def close(self):
         """flush buffer and close the handler."""
-        self._flush_buffer()
+        if self._enqueue:
+            self._queue.put(None)
+            self._worker.join(timeout=5)
+
+        with self._lock:
+            self._flush_buffer()

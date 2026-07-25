@@ -1,11 +1,11 @@
-from .logger import logger, dLogger
-from .handlers import Handler, ConsoleHandler, FileHandler, LogRecord, Filter
+from .logger import logger, dLogger, BoundLogger
+from .handlers import Handler, ConsoleHandler, FileHandler, LogRecord, Filter, NullHandler
 from .formatters import Formatter, SimpleFormatter, ExceptionFormatter
 from .filters import LevelFilter, KeywordFilter, ModuleFilter
 from .integrations import uvicorn_config, load
 from .handlers.compat import CompatHandler
 
-__version__ = "0.3.7"
+__version__ = "0.4.0"
 
 import threading
 
@@ -16,10 +16,10 @@ _lock = threading.Lock()
 
 def get_logger(name: str = None):
     """get a dlogger instance, compatible with logging.getLogger().
-    
+
     args:
         name: optional name for named logger
-    
+
     returns:
         dLogger instance
     """
@@ -31,7 +31,7 @@ def get_logger(name: str = None):
             return _loggers[name]
 
         if len(_loggers) >= _MAX_LOGGERS:
-            _loggers.clear()
+            return logger
 
         new_logger = dLogger(name=name)
 
@@ -47,8 +47,10 @@ def get_logger(name: str = None):
 __all__ = [
     "logger",
     "dLogger",
+    "BoundLogger",
     "get_logger",
     "Handler",
+    "NullHandler",
     "ConsoleHandler",
     "FileHandler",
     "LogRecord",
