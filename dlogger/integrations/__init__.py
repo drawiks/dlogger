@@ -29,6 +29,10 @@ def uvicorn_config(dlogger, logger_names=None):
             }
         },
         "loggers": loggers,
+        "root": {
+            "level": "DEBUG",
+            "handlers": ["dlogger"],
+        },
     }
 
 
