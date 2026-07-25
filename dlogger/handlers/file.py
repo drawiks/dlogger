@@ -1,13 +1,12 @@
 
-from typing import Optional
-from datetime import datetime, timedelta
 from typing import Optional, Literal
+from datetime import datetime, timedelta
 import threading
 import atexit
 import gzip
 import os
 
-from .base import Handler, LogRecord
+from .base import Handler, LogRecord, Formatter
 
 class FileHandler(Handler):
     """handler that writes log records to a file with rotation and compression support."""
@@ -16,7 +15,7 @@ class FileHandler(Handler):
         self,
         filename: str,
         level: str = "TRACE",
-        formatter: Optional[object] = None,
+        formatter: Optional[Formatter] = None,
         rotation: Optional[str] = None,
         retention: Optional[str] = None,
         compression: bool = False,

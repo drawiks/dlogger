@@ -89,7 +89,7 @@ class Handler(ABC):
         return True
 
     @abstractmethod
-    def emit(self, record: LogRecord):
+    def emit(self, record: Any):
         """emit a log record. Must be implemented by subclasses."""
         raise NotImplementedError
 

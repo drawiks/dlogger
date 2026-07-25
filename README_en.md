@@ -75,7 +75,7 @@ logger.info("but this will")
 ### log levels
 
 ```python
-logger.configure(level="INFO")  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+logger.configure(level="INFO")  # TRACE, DEBUG, INFO, SUCCESS, WARNING, ERROR, CRITICAL
 ```
 
 ### size-based rotation
@@ -197,7 +197,21 @@ logger.remove_handler(logger.handlers[0])  # remove console handler
 logger.add_handler(FileHandler("debug.log", level="DEBUG"))
 ```
 
-### multiple loggers
+### multiple loggers (get_logger)
+
+```python
+from dlogger import get_logger
+
+# like logging.getLogger()
+app = get_logger("myapp")
+module = get_logger("myapp.module")
+
+# child logger inherits handlers and level from parent
+app.info("message from app")
+module.info("message from module")
+```
+
+### multiple loggers (dLogger)
 
 ```python
 from dlogger import dLogger
@@ -243,6 +257,79 @@ try:
 except ZeroDivisionError as e:
     logger.exception("error", exc=e)
 ```
+
+### custom context
+
+```python
+from dlogger import logger
+
+# pass custom context
+logger.info("message", context="my.module:function:")
+
+# for external library integration
+logger.debug("debug from library", context="library.module:handler:")
+```
+
+---
+
+## **🖥️ uvicorn integration**
+
+### quick way
+
+```python
+from dlogger import logger, uvicorn_config
+from uvicorn.config import Config
+from uvicorn.server import Server
+
+config = Config(
+    "app:app",
+    host="0.0.0.0",
+    port=8000,
+    log_config=uvicorn_config(logger)
+)
+server = Server(config=config)
+```
+
+### from config file
+
+Create `dlogger.conf`:
+
+```ini
+[loggers]
+keys=root,repos,routers,utils
+
+[logger_root]
+level=DEBUG
+log_file=app.log
+
+[logger_repos]
+level=INFO
+log_file=repos.log
+rotation=10MB
+retention=7 days
+
+[logger_routers]
+level=WARNING
+```
+
+Then:
+
+```python
+from dlogger import load
+from uvicorn.config import Config
+from uvicorn.server import Server
+
+config = Config("app:app", log_config=load())
+server = Server(config=config)
+```
+
+**supported parameters in dlogger.conf:**
+- `level` - log level
+- `log_file` - path to log file
+- `rotation` - rotation (10MB, 1GB, 1 day, 12 hours)
+- `retention` - retention (7 days, 1 month)
+- `compression` - compression (true/false)
+- `time_format` - time format
 
 ---
 

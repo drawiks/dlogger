@@ -2,7 +2,7 @@
 from typing import Optional
 from dcolor import color
 
-from .base import Handler, LogRecord
+from .base import Handler, LogRecord, Formatter
 
 class ConsoleHandler(Handler):
     """handler that writes log records to console/stdout."""
@@ -10,13 +10,21 @@ class ConsoleHandler(Handler):
     def __init__(
         self,
         level: str = "TRACE",
-        formatter: Optional[object] = None,
+        formatter: Optional[Formatter] = None,
         show_path: bool = True,
     ):
         super().__init__(level=level, formatter=formatter)
         self._show_path = show_path
         self._separator = color('|', 'white')
         self._dash = color('-', 'white')
+
+    @property
+    def show_path(self) -> bool:
+        return self._show_path
+
+    @show_path.setter
+    def show_path(self, value: bool):
+        self._show_path = value
 
     def emit(self, record: LogRecord):
         """emit a log record to console."""
